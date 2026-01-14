@@ -1,7 +1,7 @@
 # Weather Micro Station for T-Display S3
 
 A modular, high-performance weather display system for the LILYGO T-Display S3, featuring real-time weather data from OpenWeatherMap API with smooth animations and professional UI.
-![Hardware](https://img.shields.io/badge/Hardware-LILYGO%20T%2DDisplay%2DS3-red)
+
 ![ESP32-S3](https://img.shields.io/badge/ESP32-S3-blue)
 ![Platform](https://img.shields.io/badge/Platform-PlatformIO-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
