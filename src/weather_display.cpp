@@ -32,9 +32,10 @@ WeatherDisplay::WeatherDisplay(ESP32Time& rtcRef) :
     wData2[1] = 1013.0; // pressure
     wData2[2] = 5.0;    // wind speed
     
-    // Initialize message buffers with default weather message
-    strcpy(Wmsg, "... clear sky, visibility is 10.0km/h, wind of 5.0km/h, last updated at 12:00:00 ...");
-    strcpy(WmsgBuffer, "... clear sky, visibility is 10.0km/h, wind of 5.0km/h, last updated at 12:00:00 ...");
+    // Initialize message buffers with default weather message using units from config.h
+    snprintf(Wmsg, sizeof(Wmsg), "... clear sky, visibility is 10.0%s, wind of 5.0%s, last updated at 12:00:00 ...", 
+             PPlblU1_2, PPlblU2_2);
+    strcpy(WmsgBuffer, Wmsg);
     
     setupUILabels();
     
@@ -85,21 +86,25 @@ void WeatherDisplay::generateGrayscalePalette() {
 }
 
 void WeatherDisplay::setupUILabels() {
-    PPlbl1[0] = "FEELS";
-    PPlbl1[1] = "CLOUDS";
-    PPlbl1[2] = "VISIBIL.";
+    // Using defines from config.h for labels
+    PPlbl1[0] = PPlbl1_0;
+    PPlbl1[1] = PPlbl1_1;
+    PPlbl1[2] = PPlbl1_2;
     
-    PPlblU1[0] = " °C";
-    PPlblU1[1] = " %";
-    PPlblU1[2] = " km";
+    // Using defines from config.h for units
+    PPlblU1[0] = PPlblU1_0;
+    PPlblU1[1] = PPlblU1_1;
+    PPlblU1[2] = PPlblU1_2;
     
-    PPlbl2[0] = "HUMIDITY";
-    PPlbl2[1] = "PRESSURE";
-    PPlbl2[2] = "WIND";
+    // Using defines from config.h for labels
+    PPlbl2[0] = PPlbl2_0;
+    PPlbl2[1] = PPlbl2_1;
+    PPlbl2[2] = PPlbl2_2;
     
-    PPlblU2[0] = " %";
-    PPlblU2[1] = " hPa";
-    PPlblU2[2] = " km/h";
+    // Using defines from config.h for units
+    PPlblU2[0] = PPlblU2_0;
+    PPlblU2[1] = PPlblU2_1;
+    PPlblU2[2] = PPlblU2_2;
 }
 
 void WeatherDisplay::initializeBrightnessControl() {
@@ -185,13 +190,23 @@ void WeatherDisplay::unloadFontOnce() {
 }
 
 void WeatherDisplay::updateScrollingMessage() {
-    // Create scrolling message in your requested format: "... description, visibility is (value)km/h, wind of (value)km/h, last updated at (time) ..."
-    snprintf(weatherData.scrollingMessage, sizeof(weatherData.scrollingMessage),
-            "... %s, visibility is %.1fkm/h, wind of %.1fkm/h, last updated at %s ...",
-            weatherData.description, weatherData.visibility, weatherData.windSpeed, weatherData.lastUpdated);
+    // Create scrolling message using units from config.h
+    // Format: "... description, visibility is (value)[unit], wind of (value)[unit], last updated at (time) ..."
+    
+    // Check for unlimited visibility (API max 10000m marked as -1)
+    if (weatherData.visibility < 0) {
+        snprintf(weatherData.scrollingMessage, sizeof(weatherData.scrollingMessage),
+                "... %s, visibility is %s, wind of %.1f%s, last updated at %s ...",
+                weatherData.description, VISIBILITY_UNLIMITED_FULL,
+                weatherData.windSpeed, PPlblU2_2, weatherData.lastUpdated);
+    } else {
+        snprintf(weatherData.scrollingMessage, sizeof(weatherData.scrollingMessage),
+                "... %s, visibility is %.1f%s, wind of %.1f%s, last updated at %s ...",
+                weatherData.description, weatherData.visibility, PPlblU1_2,
+                weatherData.windSpeed, PPlblU2_2, weatherData.lastUpdated);
+    }
     
     Serial.printf("Scrolling: %s\n", weatherData.scrollingMessage);
-    
     
     strcpy(WmsgBuffer, weatherData.scrollingMessage);
     messageUpdatePending = true;  // Mark that new message is ready
@@ -209,12 +224,8 @@ void WeatherDisplay::updateData() {
     // Update scrolling animation - move 2 pixels per frame for better speed
     ani -= 2;
     
-    // Use a more generous reset point to ensure clean transitions
-    int spacing = 80;  // Match the spacing in draw()
-    int resetPoint = -400;  // Fixed reset point for consistent behavior
-    
     // Reset position and update message at a fixed point for predictable transitions
-    if (ani < resetPoint) {
+    if (ani < ANIMATION_RESET_POSITION) {
         ani = ANIMATION_START_POSITION;
         
         // Apply pending message update AFTER position reset for smoother transition
@@ -268,16 +279,16 @@ void WeatherDisplay::drawLeftPanel() {
     sprite.drawFloat(weatherData.temperature, 1, 50, 80);
     sprite.unloadFont();
     
-    // Temperature unit indicator
+    // Temperature unit indicator (uses USE_METRIC_UNITS from config.h)
     sprite.loadFont(font18);
     sprite.setTextColor(grays[2], TFT_BLACK);
-    if (strcmp(config.units, "metric") == 0) {
+    #if USE_METRIC_UNITS
         sprite.drawString("C", 112, 55);
         sprite.fillCircle(103, 50, 2, grays[2]);  // Degree symbol
-    } else {
+    #else
         sprite.drawString("F", 112, 49);
         sprite.fillCircle(103, 50, 2, grays[2]);  // Degree symbol
-    }
+    #endif
     sprite.unloadFont();
     
     // Time display - memory efficient implementation using static buffer
@@ -346,9 +357,13 @@ void WeatherDisplay::drawRightPanel() {
         sprite.drawString(PPlbl1[i], x + 27, 59);
         sprite.setTextColor(grays[2], grays[9]);
         sprite.loadFont(font18);
-        // Special formatting for feels like temperature (index 0) to show 1 decimal place
+        // Special formatting based on data type
         if (i == 0) {
+            // Feels like temperature - show 1 decimal place
             snprintf(valueStrBuffer, sizeof(valueStrBuffer), "%.1f%s", wData1[i], PPlblU1[i]);
+        } else if (i == 2 && wData1[i] < 0) {
+            // Visibility - check for unlimited marker (API max 10000m)
+            snprintf(valueStrBuffer, sizeof(valueStrBuffer), "%s%s", VISIBILITY_UNLIMITED, PPlblU1[i]);
         } else {
             snprintf(valueStrBuffer, sizeof(valueStrBuffer), "%.0f%s", wData1[i], PPlblU1[i]);
         }
@@ -395,8 +410,7 @@ void WeatherDisplay::draw() {
         currentMessageWidth = errSprite.textWidth(Wmsg);
         messageWidthCached = true;
     }
-    int spacing = 80;  // Increased space between repeated messages for cleaner transitions
-    int totalWidth = currentMessageWidth + spacing;
+    int totalWidth = currentMessageWidth + SCROLL_SPACING;
     
     // Only draw the message once at the start of a new cycle to avoid mid-transition issues
     if (ani >= 0) {

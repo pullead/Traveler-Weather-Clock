@@ -1,36 +1,8 @@
 #include "weather_api.h"
-#include <ESP32Time.h> // Include ESP32Time for rtc object
-
-// ErrorHandler implementation (moved from main.cpp)
-void ErrorHandler::handleError(ErrorType type, const char* message, int code) {
-    Serial.print("ERROR [");
-    Serial.print(getErrorTypeName(type));
-    Serial.print("]: ");
-    Serial.print(message);
-    if (code != 0) {
-        Serial.print(" (Code: ");
-        Serial.print(code);
-        Serial.print(")");
-    }
-    Serial.println();
-}
-
-void ErrorHandler::clearError() {
-    Serial.println("Error cleared");
-}
-
-const char* ErrorHandler::getErrorTypeName(ErrorType type) {
-    switch (type) {
-        case HTTP_ERROR: return "HTTP";
-        case JSON_ERROR: return "JSON";
-        case NETWORK_ERROR: return "NETWORK";
-        case TIME_SYNC_ERROR: return "TIME";
-        default: return "UNKNOWN";
-    }
-}
+#include <ESP32Time.h>
 
 WeatherAPI::WeatherAPI(ESP32Time& rtcRef) : rtc(rtcRef) {
-    // Constructor initialization
+    // Constructor - rtc reference initialized
 }
 
 // connectWiFi() removed - WiFi connection now handled in main.cpp
@@ -65,7 +37,7 @@ bool WeatherAPI::getData(WeatherData& weatherData, DisplayState& displayState) {
     
     HTTPClient http;
     http.begin(apiUrl);
-    http.setTimeout(10000);  // 10 second timeout
+    http.setTimeout(API_TIMEOUT_MS);
     
     Serial.println("Fetching weather data from API...");
     int httpResponseCode = http.GET();
@@ -73,14 +45,14 @@ bool WeatherAPI::getData(WeatherData& weatherData, DisplayState& displayState) {
     if (httpResponseCode > 0) {
         // Use more memory-efficient approach than String
         int payloadSize = http.getSize();
-        if (payloadSize > 2048) {
+        if (payloadSize > API_RESPONSE_BUFFER_SIZE) {
             Serial.println("Response too large");
             http.end();
             return false;
         }
         
         // Read directly into char buffer to avoid String heap allocation
-        char payload[2048];
+        char payload[API_RESPONSE_BUFFER_SIZE];
         WiFiClient* stream = http.getStreamPtr();
         int bytesRead = stream->readBytes(payload, min(payloadSize, (int)sizeof(payload) - 1));
         payload[bytesRead] = '\0';
@@ -108,9 +80,26 @@ bool WeatherAPI::getData(WeatherData& weatherData, DisplayState& displayState) {
             weatherData.cloudCoverage = doc["clouds"]["all"];
             weatherData.visibility = doc["visibility"];
             
-            // Convert units
-            weatherData.visibility = weatherData.visibility / 1000.0;  // Convert to km
-            weatherData.windSpeed = weatherData.windSpeed * 3.6;       // Convert to km/h
+            // Check for max visibility (10000m = unlimited/clear conditions)
+            bool unlimitedVisibility = (weatherData.visibility >= 10000);
+            
+            // Convert units based on unit system (from config.h)
+            // Note: OpenWeatherMap API wind speed:
+            //   - metric: returns m/s (we convert to km/h)
+            //   - imperial: returns mph (no conversion needed)
+            // Note: Visibility is ALWAYS in meters regardless of unit setting
+            #if USE_METRIC_UNITS
+                weatherData.windSpeed = weatherData.windSpeed * 3.6;       // m/s → km/h
+                weatherData.visibility = weatherData.visibility / 1000.0;  // meters → km
+            #else
+                // Imperial: wind already in mph from API, no conversion
+                weatherData.visibility = weatherData.visibility / 1609.34; // meters → miles
+            #endif
+            
+            // Mark unlimited visibility with special value (will show as "10+" or "6+")
+            if (unlimitedVisibility) {
+                weatherData.visibility = VISIBILITY_UNLIMITED_MARKER;
+            }
             
             // Copy description safely
             const char* desc = doc["weather"][0]["description"];
@@ -139,13 +128,28 @@ bool WeatherAPI::getData(WeatherData& weatherData, DisplayState& displayState) {
             formatEpochToLocal(sunrise, weatherData.sunriseTime, sizeof(weatherData.sunriseTime), "%H:%M:%S");
             formatEpochToLocal(sunset, weatherData.sunsetTime, sizeof(weatherData.sunsetTime), "%H:%M:%S");
             
-            // Simple API data output
+            // Simple API data output (using unit labels from config.h)
             Serial.println("API VALUES:");
-            Serial.printf("Temp: %.1f°C | Feels: %.1f°C | Humidity: %.0f%% | Pressure: %.0f hPa\n", 
-                         weatherData.temperature, weatherData.feelsLike, weatherData.humidity, weatherData.pressure);
-            Serial.printf("Wind: %.1f km/h | Clouds: %.0f%% | Visibility: %.1f km | %s\n", 
-                         weatherData.windSpeed, weatherData.cloudCoverage, weatherData.visibility, weatherData.description);
-            Serial.printf("Updated: %s\n", weatherData.lastUpdated);
+            Serial.printf("Temp: %.1f%s | Feels: %.1f%s | Humidity: %.0f%s | Pressure: %.0f%s\n", 
+                         weatherData.temperature, PPlblU1_0,
+                         weatherData.feelsLike, PPlblU1_0,
+                         weatherData.humidity, PPlblU2_0,
+                         weatherData.pressure, PPlblU2_1);
+            // Handle unlimited visibility in debug output
+            if (weatherData.visibility < 0) {
+                Serial.printf("Wind: %.1f%s | Clouds: %.0f%s | Visibility: %s | %s\n", 
+                             weatherData.windSpeed, PPlblU2_2,
+                             weatherData.cloudCoverage, PPlblU1_1,
+                             VISIBILITY_UNLIMITED_FULL,
+                             weatherData.description);
+            } else {
+                Serial.printf("Wind: %.1f%s | Clouds: %.0f%s | Visibility: %.1f%s | %s\n", 
+                             weatherData.windSpeed, PPlblU2_2,
+                             weatherData.cloudCoverage, PPlblU1_1,
+                             weatherData.visibility, PPlblU1_2,
+                             weatherData.description);
+            }
+            Serial.printf("Updated: %s | Units: %s\n", weatherData.lastUpdated, UNIT_SYSTEM);
             Serial.println("=== API FETCH SUCCESS ===");
             
             displayState.isConnected = true;
@@ -166,8 +170,8 @@ bool WeatherAPI::getData(WeatherData& weatherData, DisplayState& displayState) {
 }
 
 void WeatherAPI::formatEpochToLocal(time_t epoch, char* out, size_t outSize, const char* fmt) {
-    // Eastern Time with DST rules (EST/EDT)
-    setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0/2", 1);
+    // Use timezone from config.h
+    setenv("TZ", TIMEZONE_STRING, 1);
     tzset();
 
     struct tm tmLocal;

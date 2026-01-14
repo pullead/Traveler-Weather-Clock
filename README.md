@@ -6,7 +6,7 @@ A modular, high-performance weather display system for the LILYGO T-Display S3, 
 ![Platform](https://img.shields.io/badge/Platform-PlatformIO-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-![Lilygo T-Display-S3 Display](https://github.com/sfrechette/weather-micro-station/blob/master/weather-micro-station.JPEG)
+![Lilygo T-Display-S3 Display](docs/images/weather-micro-station.JPEG)
 
 Inspired from Volos Projects (YouTube): [Let's make Cheap Internet Weather Station using LilyGo T-Display S3 and OpenWeatherMap.org](https://youtu.be/VntDY9Mg7T0?si=NuUndaefoagmdGl1)
 
@@ -68,16 +68,19 @@ Inspired from Volos Projects (YouTube): [Let's make Cheap Internet Weather Stati
 weather-micro-station/
 ├── src/
 │   ├── main.cpp              # Main application entry point
-│   ├── config.h              # Non-sensitive configuration constants
+│   ├── config.h              # Configuration (timing, units, timezone)
 │   ├── weather_data.h        # Data structures and types
 │   ├── weather_display.h/cpp # Display management and UI rendering
 │   └── weather_api.h/cpp     # API client and network operations
 ├── include/
 │   ├── secrets.h             # Secure credentials (not in git)
 │   ├── secrets_template.h    # Template for secure credentials
-│   └── *.h                   # Font files and weather icons
+│   ├── weather_icons.h       # Weather condition icons (RGB565)
+│   └── *.h                   # Font files
 ├── docs/
-│   └── execution_flow.md     # Detailed execution flow documentation
+│   ├── execution_flow.md     # Detailed execution flow documentation
+│   └── images/               # Documentation images
+├── icons/                    # Source PNG files for weather icons
 ├── SECURITY_SETUP.md         # Complete security configuration guide
 └── tools/
     ├── generate_callgraph.py # Call graph generator
@@ -138,20 +141,44 @@ graph TD
 
 ## Configuration
 
+All configuration is centralized in `src/config.h` for easy customization.
+
+### Unit System (`config.h`)
+
+```c
+// Set to true for metric (°C, km/h, km), false for imperial (°F, mph, mi)
+#define USE_METRIC_UNITS true
+```
+
+### Timezone (`config.h`)
+
+```c
+// Common examples:
+//   Eastern US:  GMT_OFFSET = -5,  TZ = "EST5EDT,M3.2.0/2,M11.1.0/2"
+//   Pacific US:  GMT_OFFSET = -8,  TZ = "PST8PDT,M3.2.0/2,M11.1.0/2"
+//   UK/London:   GMT_OFFSET = 0,   TZ = "GMT0BST,M3.5.0/1,M10.5.0/2"
+//   Europe:      GMT_OFFSET = 1,   TZ = "CET-1CEST,M3.5.0,M10.5.0/3"
+//   Japan:       GMT_OFFSET = 9,   TZ = "JST-9"
+
+#define GMT_OFFSET_HOURS -5
+#define DAYLIGHT_SAVING_ENABLED 1
+#define TIMEZONE_STRING "EST5EDT,M3.2.0/2,M11.1.0/2"
+```
+
 ### Timing Settings (`config.h`)
 
 ```c
 #define UPDATE_INTERVAL_MS 180000      // 3 minutes - API calls
 #define SYNC_INTERVAL_UPDATES 10       // 30 minutes - time sync
-#define ANIMATION_START_POSITION 320   // Scrolling start position
+#define ANIMATION_START_POSITION 100   // Scrolling start position
 ```
 
 ### Weather Data Format
 
-The scrolling ticker displays:
+The scrolling ticker displays (units adjust based on `USE_METRIC_UNITS`):
 
 ```
-"... [description], visibility is [X]km/h, wind of [Y]km/h, last updated at [HH:MM:SS] ..."
+"... [description], visibility is [X] km, wind of [Y] km/h, last updated at [HH:MM:SS] ..."
 ```
 
 ### Display Layout

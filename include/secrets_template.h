@@ -1,6 +1,8 @@
 #ifndef SECRETS_H
 #define SECRETS_H
 
+#include "../src/config.h"  // For UNIT_SYSTEM define
+
 // ==================== OPENWEATHERMAP CONFIGURATION ====================
 // Get your free API key at: https://openweathermap.org/api
 #define OPENWEATHERMAP_API_KEY "your_api_key_here"
@@ -8,7 +10,7 @@
 // API Configuration
 #define OPENWEATHERMAP_BASE_URL "https://api.openweathermap.org/data/2.5/weather"
 #define OPENWEATHERMAP_CITY "Your_City"              // e.g., "Toronto", "New York", "London"
-#define OPENWEATHERMAP_UNITS "metric"                // "metric" for Celsius, "imperial" for Fahrenheit
+#define OPENWEATHERMAP_UNITS UNIT_SYSTEM             // Controlled by USE_METRIC_UNITS in config.h
 
 // Constructed API endpoint (do not modify)
 #define OPENWEATHERMAP_API_ENDPOINT OPENWEATHERMAP_BASE_URL "?q=" OPENWEATHERMAP_CITY "&appid=" OPENWEATHERMAP_API_KEY "&units=" OPENWEATHERMAP_UNITS

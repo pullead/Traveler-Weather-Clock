@@ -131,14 +131,46 @@ chmod 600 include/secrets.h
 
 ## Advanced Configuration
 
+### Unit System Configuration (`config.h`)
+
+The unit system is configured in `src/config.h`:
+
+```c
+// Set to true for metric (°C, km/h, km), false for imperial (°F, mph, mi)
+#define USE_METRIC_UNITS true
+```
+
+This single setting automatically adjusts:
+- Temperature display (°C or °F)
+- Wind speed (km/h or mph)
+- Visibility (km or mi)
+- API request units parameter
+
+### Timezone Configuration (`config.h`)
+
+Configure your local timezone in `src/config.h`:
+
+```c
+// Change these 3 values for your timezone:
+#define GMT_OFFSET_HOURS -5                           // Your UTC offset
+#define DAYLIGHT_SAVING_ENABLED 1                     // 1 = DST, 0 = no DST
+#define TIMEZONE_STRING "EST5EDT,M3.2.0/2,M11.1.0/2"  // POSIX TZ string
+
+// Common timezone examples:
+//   Eastern US:  -5, 1, "EST5EDT,M3.2.0/2,M11.1.0/2"
+//   Central US:  -6, 1, "CST6CDT,M3.2.0/2,M11.1.0/2"
+//   Pacific US:  -8, 1, "PST8PDT,M3.2.0/2,M11.1.0/2"
+//   UK/London:    0, 1, "GMT0BST,M3.5.0/1,M10.5.0/2"
+//   Europe:       1, 1, "CET-1CEST,M3.5.0,M10.5.0/3"
+//   Japan:        9, 0, "JST-9"
+//   Australia:   10, 1, "AEST-10AEDT,M10.1.0,M4.1.0/3"
+```
+
 ### Custom API Endpoints
 
 ```c
 // For different OpenWeatherMap plans or custom proxies
 #define OPENWEATHERMAP_BASE_URL "https://api.openweathermap.org/data/2.5/weather"
-
-// For different units (metric = Celsius, imperial = Fahrenheit)
-#define OPENWEATHERMAP_UNITS "metric"  // or "imperial"
 ```
 
 ### Development vs Production

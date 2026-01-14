@@ -5,29 +5,12 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <time.h>
-// WiFiManager removed - using direct WiFi connection
 #include "config.h"
 #include "weather_data.h"
 #include "secrets.h"
 
 // Forward declarations
-class ESP32Time; // Forward declare ESP32Time
-
-class ErrorHandler {
-public:
-    enum ErrorType {
-        HTTP_ERROR,
-        JSON_ERROR,
-        NETWORK_ERROR,
-        TIME_SYNC_ERROR
-    };
-
-    static void handleError(ErrorType type, const char* message, int code = 0);
-    static void clearError();
-
-private:
-    static const char* getErrorTypeName(ErrorType type);
-};
+class ESP32Time;
 
 class WeatherAPI {
 public:

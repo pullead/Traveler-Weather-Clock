@@ -39,7 +39,7 @@ main.cpp::setup()
 │   └── Update WeatherData struct                 // Internal data storage
 ├── display.updateLegacyData()                    // Copy to display arrays
 ├── display.updateScrollingMessage()              // Format ticker text
-│   └── Format: "... description, visibility is Xkm/h, wind of Ykm/h, last updated at HH:MM:SS ..."
+│   └── Format: "... description, visibility is X [km/mi], wind of Y [km/h/mph], last updated at HH:MM:SS ..."
 ├── RESET ANIMATION: ani = ANIMATION_START_POSITION // Fresh start for data
 ├── display.updateScrollingBuffer()               // Display new message
 └── timePased = millis()                         // Start 3-minute timer
@@ -81,12 +81,12 @@ main.cpp::loop()
 │       ├── drawRightPanel()                     // Right side content
 │       │   ├── drawWeatherIcon()               // Weather condition icon
 │       │   ├── Draw weather data boxes:         // Data grid display
-│       │   │   ├── Feels like temperature      // Perceived temperature
-│       │   │   ├── Humidity percentage         // Air moisture
+│       │   │   ├── Feels like temperature      // °C or °F (based on config)
+│       │   │   ├── Humidity percentage         // Air moisture (%)
 │       │   │   ├── Pressure (hPa)             // Atmospheric pressure
-│       │   │   ├── Wind speed (km/h)          // Wind velocity
+│       │   │   ├── Wind speed                 // km/h or mph (based on config)
 │       │   │   ├── Cloud coverage (%)         // Sky conditions
-│       │   │   └── Visibility (km)            // Sight distance
+│       │   │   └── Visibility                 // km or mi (10+/6+ for unlimited)
 │       │   └── Draw scrolling ticker           // Animated message
 │       │       ├── Calculate text position     // Smooth scrolling math
 │       │       ├── Handle text wrapping        // Seamless loop
@@ -120,13 +120,13 @@ main.cpp::loop()
 
 ```cpp
 struct WeatherData {
-    float temperature;           // Current temperature (°C)
-    float feelsLike;            // Perceived temperature (°C)  
+    float temperature;           // Current temperature (°C or °F based on USE_METRIC_UNITS)
+    float feelsLike;            // Perceived temperature (°C or °F)  
     float humidity;             // Humidity percentage (%)
     float pressure;             // Atmospheric pressure (hPa)
-    float windSpeed;            // Wind velocity (km/h)
+    float windSpeed;            // Wind velocity (km/h or mph based on USE_METRIC_UNITS)
     float cloudCoverage;        // Cloud coverage (%)
-    float visibility;           // Visibility distance (km)
+    float visibility;           // Visibility distance (km or mi, -1 = unlimited)
     char description[64];       // Weather description text
     char scrollingMessage[512]; // Formatted ticker message
     char lastUpdated[32];       // Last API fetch time (HH:MM:SS)
@@ -149,13 +149,27 @@ struct DisplayState {
 ### WeatherConfig Struct
 
 ```cpp
+// Simplified - only stores city for display purposes
+// API key and units are handled via defines in secrets.h and config.h
 struct WeatherConfig {
-    const char* apiKey;         // OpenWeatherMap API key
-    const char* city;           // Target city for weather data
-    const char* units;          // Temperature units (metric/imperial)
-    int updateInterval;         // API call frequency (milliseconds)
-    // ... configuration parameters
+    char city[32];              // Target city (from secrets.h)
 };
+```
+
+### Configuration Defines (`config.h`)
+
+```cpp
+// Unit system (metric/imperial)
+#define USE_METRIC_UNITS true           // Affects temperature, wind, visibility
+
+// Timezone configuration
+#define GMT_OFFSET_HOURS -5             // UTC offset in hours
+#define DAYLIGHT_SAVING_ENABLED 1       // 1 = DST observed, 0 = no DST
+#define TIMEZONE_STRING "EST5EDT,..."   // POSIX TZ string
+
+// Timing
+#define UPDATE_INTERVAL_MS 180000       // 3 minutes between API calls
+#define SYNC_INTERVAL_UPDATES 10        // Time sync every 10 API calls
 ```
 
 ## Critical Execution Paths

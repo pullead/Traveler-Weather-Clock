@@ -5,18 +5,13 @@
 #include "secrets.h"
 
 // ==================== WEATHER CONFIGURATION STRUCTURE ====================
+// Simplified: Only stores city for display purposes
+// API key and units are handled via defines in secrets.h and config.h
 struct WeatherConfig {
-    char apiKey[64];
     char city[32];
-    char units[16];
-    int timezone;
     
-    // Default constructor with secure defaults
     WeatherConfig() {
-        strcpy(apiKey, OPENWEATHERMAP_API_KEY);  // Using API key from secrets.h
-        strcpy(city, OPENWEATHERMAP_CITY);       // Using city from secrets.h
-        strcpy(units, OPENWEATHERMAP_UNITS);     // Using units from secrets.h
-        timezone = 2;
+        strcpy(city, OPENWEATHERMAP_CITY);  // City from secrets.h
     }
 };
 
@@ -63,14 +58,6 @@ struct DisplayState {
                     lastUpdateTime(0), updateCounter(0), isConnected(false), hasError(false) {
         strcpy(errorMessage, "");
     }
-};
-
-// ==================== ERROR HANDLING ENUM ====================
-enum class ErrorType {
-    HTTP_ERROR,
-    JSON_ERROR,
-    NETWORK_ERROR,
-    TIME_SYNC_ERROR
 };
 
 #endif // WEATHER_DATA_H
