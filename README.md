@@ -1,56 +1,55 @@
-# ESP32-S3 Traveler Weather Clock
+# Traveler Weather Clock
 
-An ESP32-S3 based traveler weather clock for the Adafruit Feather ESP32-S3 TFT board.
+> A compact ESP32-S3 weather clock for travelers, built around the Adafruit Feather ESP32-S3 TFT.
 
-The device combines Wi-Fi connectivity, network time, weather information, and a compact TFT dashboard. It is designed as a portable clock for travel scenarios, where the display can show time, date, weather status, temperature, connection state, and other glanceable information.
+<p align="center">
+  <img src="assets/traveler-weather-clock-hero.png" alt="Adafruit Feather ESP32-S3 TFT traveler weather clock prototype with LiPo battery and I2C sensor" width="860">
+</p>
 
-## Hardware
+<p align="center">
+  <img alt="Board" src="https://img.shields.io/badge/board-Adafruit%20Feather%20ESP32--S3%20TFT-6B3FA0">
+  <img alt="MCU" src="https://img.shields.io/badge/mcu-ESP32--S3-E7352C">
+  <img alt="Display" src="https://img.shields.io/badge/display-240%C3%97135%20TFT-0B7285">
+  <img alt="Flash" src="https://img.shields.io/badge/flash-4MB-364FC7">
+  <img alt="PSRAM" src="https://img.shields.io/badge/psram-2MB-2F9E44">
+</p>
 
-- Board: Adafruit Feather ESP32-S3 TFT
-- PlatformIO board ID: `adafruit_feather_esp32s3_tft`
-- MCU: ESP32-S3
-- Flash: 4 MB
-- PSRAM: 2 MB
-- Display: 1.14 inch 240 × 135 ST7789 TFT
-- USB: USB-Serial/JTAG over USB-C
-- Power: USB-C or LiPo battery
+## Overview
 
-## Project Structure
+Traveler Weather Clock is a small Wi-Fi connected information display designed for travel scenarios. It combines network time, weather data, battery-powered operation, and a compact TFT dashboard on an ESP32-S3 board.
 
-```text
-.
-├── README.md
-├── LICENSE
-├── docs/
-│   ├── hardware.md
-│   ├── product-analysis.md
-│   ├── firmware-analysis.md
-│   ├── partition-map.md
-│   └── backup-and-restore.md
-├── tools/
-│   └── analyze_flash_metadata.py
-└── tests/
-    └── test_analyze_flash_metadata.py
-```
+The current repository documents the hardware target, recovered firmware layout, metadata analysis tooling, and development notes for rebuilding or extending the project.
 
-## Product Overview
+## What It Does
 
-This firmware behaves as a network-connected traveler weather clock.
+| Area | Description |
+|---|---|
+| Clock | Shows time, date, and likely time-zone oriented travel information. |
+| Weather | Displays weather condition, temperature, and update state from an online source. |
+| Display | Uses the onboard 240 × 135 ST7789 TFT for a compact dashboard UI. |
+| Connectivity | Uses ESP32-S3 Wi-Fi for time synchronization and weather updates. |
+| Portable Power | Supports USB-C and LiPo battery operation. |
+| Maintenance | Includes a UF2-related firmware image, suggesting a recovery or update path. |
 
-Main product areas:
+## Hardware Target
 
-- Time display: current time, date, and likely travel/time-zone related information.
-- Weather display: weather condition, temperature, and update status.
-- TFT interface: compact dashboard layout on the onboard 240 × 135 display.
-- Wi-Fi connectivity: network access for time and weather updates.
-- Local configuration: stored settings for connectivity, display preferences, and weather-clock behavior.
-- Maintenance path: a UF2-related image is present, suggesting a recovery or update workflow.
+| Component | Detail |
+|---|---|
+| Board | Adafruit Feather ESP32-S3 TFT |
+| PlatformIO ID | `adafruit_feather_esp32s3_tft` |
+| MCU | ESP32-S3, dual-core, 240 MHz |
+| Wireless | 2.4 GHz Wi-Fi + Bluetooth LE |
+| Flash | 4 MB |
+| PSRAM | 2 MB |
+| Display | 1.14 inch 240 × 135 ST7789 TFT |
+| USB | Native USB-C, USB-Serial/JTAG |
+| Expansion | Feather headers + STEMMA QT / Qwiic I2C |
 
-See [docs/product-analysis.md](docs/product-analysis.md) for the product-level analysis.
+See [docs/hardware.md](docs/hardware.md) for pin and interface notes.
 
-## Firmware Metadata
+## Firmware Layout
 
-The local Flash image has a 4 MB layout with one main app image, one UF2-related image, and data partitions for runtime state and file storage.
+The analyzed Flash image uses a 4 MB layout:
 
 | Partition | Type | Offset | Size | Role |
 |---|---|---:|---:|---|
@@ -60,18 +59,41 @@ The local Flash image has a 4 MB layout with one main app image, one UF2-related
 | `uf2` | app/factory | `0x2D0000` | `0x40000` | UF2 maintenance/recovery image |
 | `ffat` | data/fat | `0x310000` | `0xF0000` | Application file system |
 
-Application image summary:
+Application metadata:
 
 | Image | Project | Version | Build | ESP-IDF |
 |---|---|---|---|---|
 | `ota_0` | `arduino-lib-builder` | `43a8f6d` | `Jun 2 2026 11:17:54` | `v5.5.4` |
 | `uf2` | `tinyuf2` | `0.35.0` | `Jul 3 2025 10:50:48` | `v5.3.2` |
 
-More details are in [docs/firmware-analysis.md](docs/firmware-analysis.md) and [docs/partition-map.md](docs/partition-map.md).
+More details:
 
-## Metadata Analysis Tool
+- [Product analysis](docs/product-analysis.md)
+- [Firmware analysis](docs/firmware-analysis.md)
+- [Partition map](docs/partition-map.md)
 
-The repository includes a small Python utility for reading ESP32 Flash image metadata.
+## Repository Layout
+
+```text
+.
+├── assets/
+│   └── traveler-weather-clock-hero.png
+├── docs/
+│   ├── backup-and-restore.md
+│   ├── firmware-analysis.md
+│   ├── hardware.md
+│   ├── partition-map.md
+│   └── product-analysis.md
+├── tests/
+│   └── test_analyze_flash_metadata.py
+├── tools/
+│   └── analyze_flash_metadata.py
+└── README.md
+```
+
+## Metadata Tool
+
+The included Python tool reads ESP32 Flash structure and app-image metadata.
 
 Markdown output:
 
@@ -91,14 +113,15 @@ python tools\analyze_flash_metadata.py path\to\flash-backup.bin
 python -m unittest discover -s tests -v
 ```
 
-## Development Ideas
+## Next Development Ideas
 
-Possible next steps for rebuilding or extending the traveler weather clock:
+- Build a fresh TFT dashboard UI.
+- Add weather provider integration.
+- Add travel city or time-zone switching.
+- Add Wi-Fi setup and configuration flow.
+- Add battery status and low-power behavior.
+- Explore UF2 or serial maintenance workflows.
 
-- TFT clock dashboard
-- weather condition screen
-- travel city or time-zone switching
-- Wi-Fi setup flow
-- battery indicator
-- low-power display behavior
-- UF2 or serial maintenance workflow
+## License
+
+MIT
