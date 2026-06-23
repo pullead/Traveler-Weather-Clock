@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local virtual environments
+.venv/
+venv/
+env/
+
+# Firmware backups and extracted private data
+*.bin
+*.elf
+*.uf2
+*.hex
+*.map
+*.partition.bin
+backups/
+backup/
+private/
+extracted/
+dump/
+dumps/
+flash-dumps/
+firmware-dumps/
+
+# Sensitive local configuration
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.*
+credentials.*
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local agent implementation artifacts
+docs/superpowers/
