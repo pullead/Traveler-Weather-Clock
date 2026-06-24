@@ -1,309 +1,220 @@
-# Weather Micro Station for T-Display S3
+# Traveler Weather Clock 2.0 · 旅行天气时钟
 
-A modular, high-performance weather display system for the LILYGO T-Display S3, featuring real-time weather data from OpenWeatherMap API with smooth animations and professional UI.
+<p align="center">
+  <a href="./README.md">简体中文</a> ·
+  <a href="./README_EN.md">English</a> ·
+  <a href="./README_JA.md">日本語</a> ·
+  <a href="./docs/archive/README_v1.md">旧版 README</a>
+</p>
 
-![Hardware](https://img.shields.io/static/v1?label=Hardware&message=LilyGO%20T-Display%20S3&color=red)
-![ESP32-S3](https://img.shields.io/badge/ESP32-S3-blue)
-![Platform](https://img.shields.io/badge/Platform-PlatformIO-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-2.0-2f80ed?style=for-the-badge" alt="Version 2.0">
+  <img src="https://img.shields.io/badge/ESP32--S3-Weather%20Clock-00bcd4?style=for-the-badge" alt="ESP32-S3">
+  <img src="https://img.shields.io/badge/Mobile-Web%20Admin-46b36f?style=for-the-badge" alt="Mobile Web Admin">
+  <img src="https://img.shields.io/badge/License-MIT-f5b642?style=for-the-badge" alt="MIT License">
+</p>
 
-![Lilygo T-Display-S3 Display](docs/images/weather-micro-station.JPEG)
+<p align="center">
+  <img src="./docs/assets/startup-screen.png" alt="Traveler Weather Clock 2.0 startup screen" width="100%">
+</p>
 
-Inspired from Volos Projects (YouTube): [Let's make Cheap Internet Weather Station using LilyGo T-Display S3 and OpenWeatherMap.org](https://youtu.be/VntDY9Mg7T0?si=NuUndaefoagmdGl1)
+<p align="center">
+  <strong>一台会旅行、会看天气、会昼夜更替、还有小狗陪伴的 ESP32-S3 动漫天气时钟。</strong>
+</p>
 
-## Features
+---
 
-- **Real-time Weather Data**: Fetches current weather from OpenWeatherMap API every 3 minutes
-- **Weather Icons**: Visual weather condition icons (18 different conditions) displayed on screen
-- **Smooth Animations**: 40 FPS scrolling ticker with professional transitions
-- **Modular Architecture**: Clean, maintainable code structure with separate classes
-- **Secure Credentials**: API keys and WiFi credentials stored in `secrets.h`
-- **Performance Optimized**: Font caching, message buffering, and memory management
-- **Brightness Control**: Hardware button support for display brightness adjustment
-- **Time Synchronization**: Automatic NTP sync every 30 minutes
-- **Error Recovery**: Robust WiFi reconnection and API error handling
+## 演示视频
 
-## Quick Start
+> GitHub README 支持打开仓库内视频文件。如果你的浏览器没有直接内嵌播放，请点击下面的播放链接。
 
-### Prerequisites
+<p align="center">
+  <video src="./docs/assets/demo.mp4" controls muted playsinline width="100%"></video>
+</p>
 
-- LILYGO T-Display S3 board
-- PlatformIO IDE or Arduino IDE
-- OpenWeatherMap API key (free at [openweathermap.org](https://openweathermap.org/api))
+<p align="center">
+  <a href="./docs/assets/demo.mp4">▶ 点击播放演示视频</a>
+</p>
 
-### Installation
+---
 
-1. **Clone the repository:**
+## 项目简介
 
-   ```bash
-   git clone <repository-url>
-   cd weather-micro-station
-   ```
+Traveler Weather Clock 2.0 是一个基于 ESP32-S3 TFT 开发板的旅行主题天气时钟固件。它不只是显示时间和天气，而是把实时天气、日出日落、月相、降水概率、节假日、Wi-Fi 状态和动画场景融合成一个 2D 横版旅行世界：旅行者骑着自行车前进，白色比熊犬快乐地跟在后面，背景和泥路循环滚动；到了深夜，旅行者会在帐篷旁休息，小狗守在旁边，篝火轻轻闪动。
 
-2. **Create secrets file:**
+默认地点为日本兵库县朝来市，并使用网络时间与在线天气数据自动驱动画面。
 
-   ```bash
-   cp include/secrets_template.h include/secrets.h
-   ```
+---
 
-3. **Configure your credentials in `include/secrets.h`:**
+## 2.0 亮点
 
-   ```c
-   #define OPENWEATHERMAP_API_KEY "your_api_key_here"
-   #define WIFI_SSID "your_wifi_network"
-   #define WIFI_PASSWORD "your_wifi_password"
-   #define OPENWEATHERMAP_CITY "Your_City"
-   ```
+| 模块 | 功能 |
+| --- | --- |
+| 动漫旅行场景 | 2D 横版骑行、泥路与远景滚动、草丛变化、昼夜明暗过渡 |
+| 实时天气动画 | 晴、多云、阴、雨、雪、雨夹雪、雷雨、台风、强风、雾霾等天气效果 |
+| 天文同步 | 根据朝来市日出日落、太阳高度、月相与月亮轨迹绘制天空元素 |
+| 状态栏组件 | 时间、日期、天气文字与图标、温度范围、体感温度、Wi-Fi、日本祝日、太阳轨迹、降水概率、月相、当前气温 |
+| 小狗伙伴 | 白色毛茸茸比熊犬白天奔跑、夜间在帐篷旁守护 |
+| 随机场景预览 | 短按 BOOT 随机切换天气 + 昼夜 + 动画组合，双击恢复实时天气 |
+| 多 Wi-Fi 记忆 | 连接过的家庭、公司等 Wi-Fi 会保存，开机自动匹配可用网络 |
+| 手机网页后台 | 同一 Wi-Fi 下通过手机浏览器管理天气、角色、动画、状态栏、Wi-Fi 和系统设置 |
+| 开机画面 | 专属 Traveler Weather Clock 2.0 启动画面 |
 
-4. **Build and upload:**
+---
 
-   ```bash
-   pio run --target upload
-   ```
+## 手机网页管理后台
 
-## Architecture Overview
+<p align="center">
+  <img src="./docs/assets/mobile-admin-ui.png" alt="Traveler Weather Clock mobile web admin UI" width="100%">
+</p>
 
-### Project Structure
+手机与开发板连接到同一个 Wi-Fi 后，可以打开：
 
+- `http://travel-clock.local`
+- 或开发板屏幕/串口显示的局域网 IP，例如 `http://192.168.0.100`
+
+后台包含：
+
+- 首页概览：开机画面、当前天气、24 小时降水概率、日出日落、月相、设备状态
+- 天气预报：实时天气、24 小时、7 天、日出日落、月相
+- 角色设置：旅行者服装、小狗毛色/速度/夜间亮度、动画速度、场景预览
+- 状态栏管理：开启/关闭并排序 Wi-Fi、祝日、太阳轨迹、降水概率、体感温度、月相等模块
+- 系统设置：亮度、主题色、动画速度、夜间模式、重启设备
+- Wi-Fi 管理：添加、删除、清空已保存网络
+
+设置会写入 ESP32 的 NVS/Preferences，重启后会自动加载上次保存的参数。
+
+---
+
+## 默认地点与数据来源
+
+- 默认地点：日本兵库县朝来市
+- 时区：Asia/Tokyo / JST
+- 天气数据：Open-Meteo
+- 日本祝日：holidays-jp
+- 时间同步：NTP
+- 月相与太阳/月亮位置：固件内置天文计算 + 网络时间
+
+---
+
+## 硬件
+
+当前 2.0 固件主要适配：
+
+- Adafruit Feather ESP32-S3 TFT
+- 240 × 135 ST7789 TFT 屏幕
+- ESP32-S3 Wi-Fi
+- BOOT 按键
+
+也可以移植到其他 ESP32-S3 + TFT 屏幕，但需要调整屏幕驱动、引脚和分辨率布局。
+
+---
+
+## 快速开始
+
+### 1. 安装 Arduino CLI 与 ESP32 开发板支持
+
+如果你已经可以编译/烧录 ESP32-S3，可以跳过这一步。
+
+### 2. 编译 2.0 固件
+
+```bash
+arduino-cli compile \
+  --fqbn esp32:esp32:adafruit_feather_esp32s3_tft \
+  firmware/TravelWeatherClockV2
 ```
+
+### 3. 烧录到开发板
+
+将开发板进入下载模式后执行：
+
+```bash
+arduino-cli upload \
+  --fqbn esp32:esp32:adafruit_feather_esp32s3_tft \
+  --port /dev/cu.usbmodem1101 \
+  firmware/TravelWeatherClockV2
+```
+
+如果你的串口不是 `/dev/cu.usbmodem1101`，请替换为实际端口。
+
+### 4. 首次连接 Wi-Fi
+
+首次启动或清空 Wi-Fi 后，设备会进入配网流程。根据屏幕提示连接设备热点，或打开：
+
+```text
+http://192.168.4.1
+```
+
+选择 Wi-Fi 并输入密码后，设备会保存该网络。以后在家、公司等已连接过的网络之间移动时，开机后会自动尝试连接保存过的 Wi-Fi。
+
+---
+
+## BOOT 按键
+
+| 操作 | 效果 |
+| --- | --- |
+| 单击 | 随机切换一个天气 + 昼夜 + 场景动画组合 |
+| 双击 | 恢复当前真实时间与实时天气 |
+| 长按约 4 秒 | 清空 Wi-Fi 配置 |
+
+随机预览模式会同时切换旅行者服装、天气动画、降水概率曲线和白天小鸟等场景元素；恢复实时模式后，会重新回到朝来市当前天气与时间。
+
+---
+
+## 项目结构
+
+```text
 weather-micro-station/
-├── src/
-│   ├── main.cpp              # Main application entry point
-│   ├── config.h              # Configuration (timing, units, timezone)
-│   ├── weather_data.h        # Data structures and types
-│   ├── weather_display.h/cpp # Display management and UI rendering
-│   └── weather_api.h/cpp     # API client and network operations
-├── include/
-│   ├── secrets.h             # Secure credentials (not in git)
-│   ├── secrets_template.h    # Template for secure credentials
-│   ├── weather_icons.h       # Weather condition icons (RGB565)
-│   └── *.h                   # Font files
+├── README.md                         # 中文项目主页
+├── README_EN.md                      # English README
+├── README_JA.md                      # 日本語 README
 ├── docs/
-│   ├── execution_flow.md     # Detailed execution flow documentation
-│   └── images/               # Documentation images
-├── icons/                    # Source PNG files for weather icons
-├── SECURITY_SETUP.md         # Complete security configuration guide
-└── tools/
-    ├── generate_callgraph.py # Call graph generator
-    └── trace_functions.h     # Runtime function tracing
+│   ├── assets/
+│   │   ├── startup-screen.png        # 2.0 开机画面
+│   │   ├── mobile-admin-ui.png       # 手机网页后台展示图
+│   │   └── demo.mp4                  # 演示视频
+│   └── archive/
+│       └── README_v1.md              # 旧版项目说明归档
+├── firmware/
+│   └── TravelWeatherClockV2/         # 2.0 Arduino 固件
+├── include/                          # 字体与图标资源
+├── src/                              # 原版 PlatformIO 代码
+└── tools/                            # 辅助脚本
 ```
 
-### Key Components
+---
 
-| Component | Purpose | Key Features |
-|-----------|---------|--------------|
-| **WeatherDisplay** | UI rendering and animation | 40 FPS updates, font caching, scrolling ticker |
-| **WeatherAPI** | Network and API operations | HTTP client, JSON parsing, error handling |
-| **WeatherData** | Data structures | Weather info, display state, configuration |
-| **Main Loop** | Orchestration | Timing control, state management |
+## 保留旧版本说明的方法
 
-## Execution Flow
+本仓库采用两种方式保留旧版项目说明：
 
-[View detail Weather Station Execution Flow Analysis](https://github.com/sfrechette/weather-micro-station/blob/master/docs/execution_flow.md)
+1. Git 历史天然保留旧 README，可以通过提交历史查看。
+2. 当前仓库额外提供归档文件：[docs/archive/README_v1.md](./docs/archive/README_v1.md)，用户无需翻 Git 历史也能打开旧版说明。
 
-### Startup Sequence (10-15 seconds)
+如果后续发布正式版本，建议再创建 GitHub Release / Tag，例如 `v1.x` 和 `v2.0.0`，这样旧版固件和说明也能更清晰地固定下来。
 
-```mermaid
-graph TD
-    A[Power On/Upload] --> B[Serial Init]
-    B --> C[Display Init]
-    C --> D[WiFi Connection]
-    D --> E[Time Sync]
-    E --> F[Show 'Fetching data...']
-    F --> G[Initial API Call]
-    G --> H[Update Display]
-    H --> I[Enter Main Loop]
-```
+---
 
-### Main Loop (Continuous at 40Hz)
+## GitHub 多语言说明
 
-```mermaid
-graph TD
-    A[Loop Start] --> B{25ms passed?}
-    B -->|No| J[yield]
-    B -->|Yes| C[Update Animation]
-    C --> D{3 minutes passed?}
-    D -->|No| G[Draw Display]
-    D -->|Yes| E[API Fetch Sequence]
-    E --> F[Update Data]
-    F --> G
-    G --> H[Handle Buttons]
-    H --> J
-    J --> A
-```
+GitHub README 不允许执行自定义 JavaScript，因此无法在同一个 Markdown 页面里做真正的“无刷新自动切换语言”。本项目采用开源项目最常见、最稳定的做法：在顶部提供三个语言按钮，分别跳转到：
 
-### API Fetch Sequence (Every 3 minutes)
+- [简体中文](./README.md)
+- [English](./README_EN.md)
+- [日本語](./README_JA.md)
 
-1. **Clear Animation** → Reset scrolling position
-2. **Show "Fetching data..."** → 2-second display
-3. **HTTP API Call** → OpenWeatherMap request
-4. **Parse JSON** → Extract weather data
-5. **Update Display** → Fresh animation with new data
+每种语言版本都包含项目图片与演示视频入口。
 
-## Configuration
+---
 
-All configuration is centralized in `src/config.h` for easy customization.
+## 致谢
 
-### Unit System (`config.h`)
+本项目最初基于 sfrechette/weather-micro-station 的天气时钟思路继续扩展，并围绕 ESP32-S3、中文界面、旅行主题动画、手机网页后台和朝来市实时天气进行了深度改造。
 
-```c
-// Set to true for metric (°C, km/h, km), false for imperial (°F, mph, mi)
-#define USE_METRIC_UNITS true
-```
+天气数据与节假日数据分别由 Open-Meteo 与 holidays-jp 提供。
 
-### Timezone (`config.h`)
-
-```c
-// Common examples:
-//   Eastern US:  GMT_OFFSET = -5,  TZ = "EST5EDT,M3.2.0/2,M11.1.0/2"
-//   Pacific US:  GMT_OFFSET = -8,  TZ = "PST8PDT,M3.2.0/2,M11.1.0/2"
-//   UK/London:   GMT_OFFSET = 0,   TZ = "GMT0BST,M3.5.0/1,M10.5.0/2"
-//   Europe:      GMT_OFFSET = 1,   TZ = "CET-1CEST,M3.5.0,M10.5.0/3"
-//   Japan:       GMT_OFFSET = 9,   TZ = "JST-9"
-
-#define GMT_OFFSET_HOURS -5
-#define DAYLIGHT_SAVING_ENABLED 1
-#define TIMEZONE_STRING "EST5EDT,M3.2.0/2,M11.1.0/2"
-```
-
-### Timing Settings (`config.h`)
-
-```c
-#define UPDATE_INTERVAL_MS 180000      // 3 minutes - API calls
-#define SYNC_INTERVAL_UPDATES 10       // 30 minutes - time sync
-#define ANIMATION_START_POSITION 100   // Scrolling start position
-```
-
-### Weather Data Format
-
-The scrolling ticker displays (units adjust based on `USE_METRIC_UNITS`):
-
-```
-"... [description], visibility is [X] km, wind of [Y] km/h, last updated at [HH:MM:SS] ..."
-```
-
-### Display Layout
-
-- **Left Panel**: Time, date, temperature, "Micro Station" branding
-- **Right Panel**: Weather icon (18 different conditions), humidity, pressure, wind, clouds, visibility
-- **Bottom Ticker**: Scrolling weather summary with real-time updates
-
-### Weather Icons
-
-The app includes **18 weather condition icons** (9 in reality, using same icon for day(d) and night(n)) that automatically display based on the current weather:
-
-- **Clear sky** (01d/01n)
-- **Few clouds** (02d/02n)
-- **Scattered clouds** (03d/03n)
-- **Broken clouds** (04d/04n)
-- **Shower rain** (09d/09n)
-- **Rain** (10d/10n)
-- **Thunderstorm** (11d/11n)
-- **Snow** (13d/13n)
-- **Mist** (50d/50n)
-
-Icons are 24x24 pixels, stored in RGB565 format, and automatically selected based on the OpenWeatherMap API response. Day and night variants are supported.
-
-## Development Tools
-
-### Function Call Tracing
-
-Add to your code for runtime analysis:
-
-```cpp
-#include "tools/trace_functions.h"
-
-void myFunction() {
-    TRACE_FUNCTION();              // Basic tracing
-    MONITOR_PERFORMANCE("myFunc"); // Performance monitoring
-    TRACK_CALL_STACK();           // Call stack depth
-    // ... your code
-}
-```
-
-### Call Graph Generation
-
-Generate visual call graphs:
-
-```bash
-python3 generate_callgraph.py > callgraph.md
-```
-
-### Static Analysis
-
-Run comprehensive code analysis:
-
-```bash
-pio check --verbose
-```
-
-## Performance Metrics
-
-| Metric | Value | Notes |
-|--------|--------|-------|
-| **Display FPS** | 40 Hz | Smooth animation |
-| **API Calls** | Every 3 minutes | Rate limit compliant |
-| **Memory Usage** | ~85% heap | Optimized buffers |
-| **WiFi Reconnect** | 30 second timeout | Automatic recovery |
-| **Time Sync** | Every 30 minutes | NTP synchronization |
-
-## Troubleshooting
-
-### Common Issues
-
-**Display not updating:**
-
-- Check WiFi connection (LED indicators)
-- Verify API key in `secrets.h`
-- Monitor serial output for errors
-
-**Scrolling message stuck:**
-
-- API call might be failing
-- Check internet connectivity
-- Verify OpenWeatherMap service status
-
-**Compilation errors:**
-
-- Ensure all font files are in `include/` directory
-- Check `secrets.h` exists and is properly formatted
-- Verify PlatformIO libraries are installed
-
-### Debug Output
-
-Enable detailed logging by monitoring serial output at 115200 baud:
-
-```
-=== STARTUP: Making initial API call ===
-Scrolling: ... Fetching data ...
-=== API FETCH SUCCESS ===
-API VALUES:
-Temp: 22.1°C | Feels: 24.3°C | Humidity: 65% | Pressure: 1013 hPa
-Wind: 11.1 km/h | Clouds: 75% | Visibility: 10.0 km | few clouds
-Updated: 14:23:45
-```
-
-## Security Notes
-
-- **Never commit `secrets.h`** - Add to `.gitignore` (see `SECURITY_SETUP.md`)
-- **API Key Protection** - Use environment variables in production
-- **WiFi Security** - Ensure WPA2/WPA3 network encryption
-- **HTTPS Only** - All API calls use secure connections
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- **OpenWeatherMap** - Weather data API
-- **LILYGO** - T-Display S3 hardware
-- **TFT_eSPI** - Display library
-- **ArduinoJson** - JSON parsing
-- **ESP32Time** - Real-time clock management
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/sfrechette/weather-micro-station/issues)
-  
----
+MIT License. See [LICENSE](./LICENSE).
