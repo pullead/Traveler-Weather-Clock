@@ -29,13 +29,13 @@
 > GitHub 对 README 内嵌视频支持不稳定，因此这里使用“点击封面打开视频”的方式，手机和电脑端都更可靠。
 
 <p align="center">
-  <a href="https://github.com/pullead/Traveler-Weather-Clock/blob/main/docs/assets/demo.mp4">
+  <a href="https://pullead.github.io/Traveler-Weather-Clock/demo.html">
     <img src="./docs/assets/demo-cover.jpg" alt="Traveler Weather Clock demo video cover" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pullead/Traveler-Weather-Clock/blob/main/docs/assets/demo.mp4">▶ 点击打开演示视频</a>
+  <a href="https://pullead.github.io/Traveler-Weather-Clock/demo.html">▶ 点击打开网页播放器</a>
   ·
   <a href="https://github.com/pullead/Traveler-Weather-Clock/raw/refs/heads/main/docs/assets/demo.mp4">备用下载/播放</a>
 </p>
@@ -178,6 +178,8 @@ weather-micro-station/
 │   │   ├── mobile-admin-ui.png       # 手机网页后台展示图
 │   │   ├── demo-cover.jpg            # 演示视频封面
 │   │   └── demo.mp4                  # 演示视频
+│   ├── demo.html                     # GitHub Pages 视频播放器
+│   ├── index.html                    # GitHub Pages 入口
 │   └── archive/
 │       └── README_v1.md              # 旧版项目说明归档
 ├── firmware/

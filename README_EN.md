@@ -27,13 +27,13 @@
 ## Demo Video
 
 <p align="center">
-  <a href="https://github.com/pullead/Traveler-Weather-Clock/blob/main/docs/assets/demo.mp4">
+  <a href="https://pullead.github.io/Traveler-Weather-Clock/demo.html">
     <img src="./docs/assets/demo-cover.jpg" alt="Traveler Weather Clock demo video cover" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pullead/Traveler-Weather-Clock/blob/main/docs/assets/demo.mp4">▶ Open the demo video</a>
+  <a href="https://pullead.github.io/Traveler-Weather-Clock/demo.html">▶ Open the web video player</a>
   ·
   <a href="https://github.com/pullead/Traveler-Weather-Clock/raw/refs/heads/main/docs/assets/demo.mp4">Fallback download/playback</a>
 </p>
@@ -168,6 +168,8 @@ weather-micro-station/
 │   │   ├── mobile-admin-ui.png
 │   │   ├── demo-cover.jpg
 │   │   └── demo.mp4
+│   ├── demo.html
+│   ├── index.html
 │   └── archive/
 │       └── README_v1.md
 ├── firmware/
