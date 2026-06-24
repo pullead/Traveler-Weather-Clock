@@ -1,37 +1,72 @@
-# PlatformIO
+# PlatformIO / Arduino build artifacts
 .pio/
-.vscode/
 .pioenvs/
 .piolibdeps/
-
-# Secrets and sensitive files
-include/secrets.h
-secrets.h
-config/secrets.*
-
-# Keep template files (these should be committed)
-!include/secrets_template.h
-!secrets_template.h
-
-# Build artifacts
 build/
 *.bin
 *.elf
+*.uf2
+*.hex
 *.map
+*.partition.bin
 
-# IDE files
-.vscode/
-*.code-workspace
-.idea/
-*.iml
+# Secrets and sensitive local configuration
+include/secrets.h
+secrets.h
+config/secrets.*
+secrets.*
+credentials.*
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
 
-# OS files
+# Keep template files
+!include/secrets_template.h
+!secrets_template.h
+
+# Firmware backups and extracted private data
+backups/
+backup/
+private/
+extracted/
+dump/
+dumps/
+flash-dumps/
+firmware-dumps/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+env/
+venv/
+.venv/
+
+# Node.js tooling
+node_modules/
+npm-debug.log
+
+# IDE / OS
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.code-workspace
+*.iml
 *.tmp
 *.temp
 
-# Logs and debug files
+# Logs and debug output
 *.log
 debug.txt
 serial_output.txt
@@ -41,26 +76,11 @@ serial_output.txt
 *.bak
 *~
 
-# Documentation build
+# Documentation build output
 docs/_build/
 site/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-
-# Node.js (if used for tooling)
-node_modules/
-npm-debug.log
+docs/superpowers/
 
 # Test artifacts
 test_results/
 coverage/
-
-# icons
-icons/
